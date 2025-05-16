@@ -26,15 +26,21 @@ let clean_special_characters s =
         .Replace("&lt;", "<")
         .Replace("&gt;", ">")
 
+let ask_question (resultsJson: JsonNode) = 
+    resultsJson.Item "question"
+    |> string 
+    |> clean_special_characters
+    |> System.Console.WriteLine
+
+    //TODO: Create a list of shuffled answers to display. 
 
 //TODO: Finish parsing JSON and then proceed to take and process user input.
 [<EntryPoint>]
 let main args =
     let triviaJson = get_questions |> Async.RunSynchronously
     if triviaJson.Item "response_code" |> int |> response_is_success then
-        string (triviaJson.Item "results") 
-        |> clean_special_characters 
-        |> System.Console.WriteLine 
+        (triviaJson.Item "results").[0]
+        |> ask_question
         0
     else
         1
