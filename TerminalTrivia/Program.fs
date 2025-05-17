@@ -22,8 +22,6 @@ let get_result =
         response.EnsureSuccessStatusCode () |> ignore
         let! content = response.Content.ReadAsStringAsync() |> Async.AwaitTask
         return JsonNode.Parse content
-
-
     }
 
 let response_is_success (c: int) = c = 0
@@ -36,6 +34,7 @@ let ask_question (trivia: Trivia) =
     let answers = 
         List.ofArray trivia.incorrect_answers 
         |> (List.insertAt 0 trivia.correct_answer)
+        |> List.randomShuffle
     
     for idx, answer in List.indexed answers do
         printfn "%i: %s" idx (HttpUtility.HtmlDecode answer)
