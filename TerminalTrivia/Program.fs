@@ -2,9 +2,9 @@
 // Presents the user with trivia questions to answer.
 // Uses the Open Trivia DB API.
 open System.Net.Http
+open System.Web
 open System.Text.Json.Nodes
 open System.Text.Json
-open System.Text.RegularExpressions
 
 
 type Trivia = {
@@ -28,21 +28,26 @@ let get_result =
 
 let response_is_success (c: int) = c = 0
 
-
 let ask_question (trivia: Trivia) = 
     trivia.question
-    |> System.Web.HttpUtility.HtmlDecode
+    |> HttpUtility.HtmlDecode
     |> System.Console.WriteLine 
 
     let answers = 
         List.ofArray trivia.incorrect_answers 
         |> (List.insertAt 0 trivia.correct_answer)
-        |> List.indexed
     
-    for idx, answer in answers do
-        printfn "%i: %s" idx answer
+    for idx, answer in List.indexed answers do
+        printfn "%i: %s" idx (HttpUtility.HtmlDecode answer)
 
-//TODO: Finish parsing JSON and then proceed to take and process user input.
+    System.Console.Write "> "
+    let index = System.Console.ReadLine() |> int
+    
+    if answers[index] = HttpUtility.HtmlDecode trivia.correct_answer then
+        System.Console.WriteLine "You got the right answer!"
+    else
+        printfn "The correct answer was:\n%s" (HttpUtility.HtmlDecode trivia.correct_answer)
+
 [<EntryPoint>]
 let main args =
     let triviaJson = get_result |> Async.RunSynchronously
@@ -52,4 +57,5 @@ let main args =
         ask_question trivia
         0
     else
+        System.Console.WriteLine "Unable to get trivia question."
         1
