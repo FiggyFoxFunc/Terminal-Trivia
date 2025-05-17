@@ -10,5 +10,10 @@ bin
 !.paket/paket.bootstrapper.exe
 .ionide/
 .fake
+<<<<<<< HEAD
 /.vs/
 /.vs/*
+=======
+/vs/
+/vs/*
+>>>>>>> aa0189faa2ca6c82ddc757fe63af2c852e9d9a78
