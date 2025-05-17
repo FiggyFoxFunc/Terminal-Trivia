@@ -28,19 +28,19 @@ let get_result =
 
 let response_is_success (c: int) = c = 0
 
-let clean_special_characters s = 
-    (Regex.Unescape s)
-        .Replace("&quot;", "\"")
-        .Replace("&apos;", "'")
-        .Replace("&amp;", "&")
-        .Replace("&lt;", "<")
-        .Replace("&gt;", ">")
 
 let ask_question (trivia: Trivia) = 
     trivia.question
-    |> clean_special_characters
+    |> System.Web.HttpUtility.HtmlDecode
     |> System.Console.WriteLine 
-    //TODO: Create a list of shuffled answers to display. 
+
+    let answers = 
+        List.ofArray trivia.incorrect_answers 
+        |> (List.insertAt 0 trivia.correct_answer)
+        |> List.indexed
+    
+    for idx, answer in answers do
+        printfn "%i: %s" idx answer
 
 //TODO: Finish parsing JSON and then proceed to take and process user input.
 [<EntryPoint>]
