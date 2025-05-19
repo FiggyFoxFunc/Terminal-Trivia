@@ -26,22 +26,33 @@ let get_result =
 
 let response_is_success (c: int) = c = 0
 
-let ask_question (trivia: Trivia) = 
+let answers trivia = 
+    List.ofArray trivia.incorrect_answers 
+    |> (List.insertAt 0 trivia.correct_answer)
+    |> List.randomShuffle
+
+let print_question trivia =
     trivia.question
     |> HttpUtility.HtmlDecode
-    |> System.Console.WriteLine 
+    |> System.Console.WriteLine
 
-    let answers = 
-        List.ofArray trivia.incorrect_answers 
-        |> (List.insertAt 0 trivia.correct_answer)
-        |> List.randomShuffle
-    
-    for idx, answer in List.indexed answers do
-        printfn "%i: %s" idx (HttpUtility.HtmlDecode answer)
+let print_answers (answers: string list) =
+    let rec iter idx = 
+        if idx < 0 then
+            ()
+        else
+            answers[idx]
+            |> HttpUtility.HtmlDecode
+            |> printfn "%i: %s" idx
+            iter (idx - 1)
+    (List.length answers) - 1
+    |> iter
 
+let get_input (trivia: Trivia) =  
     System.Console.Write "> "
-    let index = System.Console.ReadLine() |> int
-    
+    System.Console.ReadLine() |> int
+
+let is_correct trivia (answers: string list) index =
     if answers[index] = HttpUtility.HtmlDecode trivia.correct_answer then
         System.Console.WriteLine "You got the right answer!"
     else
@@ -53,7 +64,13 @@ let main args =
     if triviaJson.Item "response_code" |> int |> response_is_success then
         let (inner: JsonNode) = (triviaJson.Item "results").[0]
         let trivia =  JsonSerializer.Deserialize(inner, JsonSerializerOptions.Default)
-        ask_question trivia
+        let answers = answers trivia
+
+        print_question trivia
+        print_answers answers
+        get_input trivia
+        |> is_correct trivia answers
+
         0
     else
         System.Console.WriteLine "Unable to get trivia question."
